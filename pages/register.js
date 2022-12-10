@@ -1,68 +1,56 @@
-import axios from "axios";
 import React, { useState } from "react";
 import Link from "next/link";
-import { setUserSession } from "./Utils/Common";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
+import AuthService from "../services/auth.Service";
 
-const formInitialState = {
-  firstName: "",
-  lastName: "",
-  phoneNumber: "",
-  username: "",
-  email: "",
-  password: "",
-};
+export default function SignUp() {
+  // const [successMessage, setSuccessMessage] = useState("");
 
-export default function Register() {
-  const [formDetails, setFormDetails] = useState(formInitialState);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors }, // formState
+  } = useForm({
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      phoneNumber: "",
+      username: "",
+      email: "",
+      password: "",
+    },
+    // mode: "onchange"
+  });
 
-  const submitHandler = async (event) => {
-    event.preventDefault();
-  
-    // if (formInitialState) {
-    //   setError(true)
-    //   setError("Please enter the appropriate field");
-    //   return
-    // }
+  const router = useRouter();
 
-    setError(null);
-    setLoading(true);
-    await axios
-      .post(
-        "https://cashout-app.herokuapp.com/api/v1/auth/register",
-        formDetails
-      )
-      // setFormDetails(formInitialState)
-      .then((response) => {
-        if (response.data.token)
-        console.log("response >>> ", response);
-        setLoading(false);
-        setUserSession(response.data.token, response.data.user);
-        window.location = "/Dashboard";
-      })
-      .catch((error) => {
-        if (error.response.status === 401 || error.response.status === 400) {
-          console.log(error.toJSON());
-          setError("User Already Exist!");
-        } else {
-          setError("Something Went Wrong!");
-        }
-      });
-  };
-
-  const changeHandler = (e) => {
-    const { name, value } = e.target;
-    setFormDetails({ ...formDetails, [name]: value });
+  const submitHandler = ({ firstName, lastName, phoneNumber, username, email, password }) => {
+    
+    if(firstName || lastName || phoneNumber || username || email || password) {
+     AuthService.signUp(firstName, lastName, phoneNumber, username, email, password).then(() => {
+      router.push("/Dashboard")
+     }).catch((error) => {
+      if( error.response?.status === 400 || error.response?.status === 500 ) {
+        alert("User Already Exist")
+        console.log(error)
+        // router.reload('/register')
+      } else {
+        alert("Something went wrong")
+      }
+     })
+    }
   };
 
   return (
-    <div className="select-none text-xs sm:text-xl justify-center flex flex-col gap-4 sm:gap-6 items-center h-screen">
+    <form
+      onSubmit={handleSubmit(submitHandler)}
+      className="select-none text-xs sm:text-xl justify-center flex flex-col gap-4 sm:gap-6 items-center h-screen"
+    >
       <h1 className="sm:text-3xl mb-2 text-white font-sans text-3xl">
         REGISTER
       </h1>
-      {successMessage && (
+      {/* {successMessage && (
         <div className="text-center w-full max-w-[39ch] border border-solid border-green-400 text-green-900 py-2">
           {successMessage}
         </div>
@@ -71,63 +59,159 @@ export default function Register() {
         <div className="text-center w-full max-w-[39ch] border border-solid border-rose-700 text-rose-300 py-2">
           {error}
         </div>
-      )}
-      {/* <select id="accountType" onChange={getAccountType}>
-        <option value={corporate}>Corporate</option>
-        <option value={partner}>Partner</option>
-      </select> */}
+      )} */}
+
       <input
-        type="text"
-        name="firstName"
-        onChange={changeHandler}
+        {...register("firstName", {
+          required: "Please enter firstName !",
+          minLength: {
+            value: 3,
+            message: "First Name can not be less than 3 letters"
+          },
+          maxLength: {
+            value: 15,
+            message: "First Name can not be greater than 15 letters"
+          },
+          pattern: {
+            value: /^[A-Za-z]+$/,
+            message: "Only letters are allowed / No spacing !"
+          },
+        })}
         className="duration-300 border-b-2 border-solid border-black focus:border-cyan-300 outline-none font-sans font-bold py-3 px-3 w-full max-w-[45ch] text-slate-900"
         placeholder="Please Enter Your First Name"
+        aria-invalid={errors.firstName ? "true" : "false"}
       />
+        {errors.firstName && (
+          <p className="w-full max-w-[39ch] text-rose-300 mt-[-2ch]" role="alert">
+            {errors.firstName?.message}
+          </p>
+        )}
+
       <input
-        type="text"
-        name="lastName"
-        onChange={changeHandler}
+        {...register("lastName", {
+          required: "Please enter lastName !",
+          minLength: {
+            value: 3,
+            message: "Last Name can not be less than 3 letters",
+          },
+          maxLength: {
+            value: 15,
+            message: "Last Name can not be greater than 15 letters"
+          },
+          pattern: {
+            value: /^[A-Za-z]+$/,
+            message: "Only letters are allowed / No spacing !"
+          },
+        })}
         className="duration-300 border-b-2 border-solid border-black focus:border-cyan-300 outline-none font-sans font-bold py-3 px-3 w-full max-w-[45ch] text-slate-900"
         placeholder="Please Enter Your Last Name"
+        aria-invalid={errors.lastName ? "true" : "false"}
       />
+        {errors.lastName && (
+          <p className="w-full max-w-[39ch] text-rose-300 mt-[-2ch]" role="alert">
+          {errors.lastName?.message}
+          </p>
+        )}
+
       <input
-        type="text"
-        name="phoneNumber"
-        onChange={changeHandler}
+        {...register("phoneNumber", {
+          required: " Please enter phoneNumber !",
+          minLength: {
+            value: 11,
+            message: "Phone number can not be less than 11 digits"
+          },
+          maxLength: {
+            value: 11,
+            message: "Phone number can not be greater than 11 digits",
+          },
+          pattern: {
+            value:  /^[0-9\b]+$/,
+            message: "Input valid phone number !"
+          }
+        })}
         className="duration-300 border-b-2 border-solid border-black focus:border-cyan-300 outline-none font-sans font-bold py-3 px-3 w-full max-w-[45ch] text-slate-900"
         placeholder="Please Enter PhoneNumber"
+        aria-invalid={errors.phoneNumber ? "true" : "false"}
       />
+          {errors.phoneNumber && (
+        <p className="w-full max-w-[39ch] text-rose-300 mt-[-2ch]" role="alert">
+         {errors.phoneNumber?.message}
+        </p>
+      )}
+
       <input
-        type="text"
-        name="username"
-        onChange={changeHandler}
+        {...register("username", {
+          required: "  Please enter username !",
+          minLength: {
+            value: 3,
+            message: "username can not be less than 3 digits",
+          },
+          maxLength: {
+            value: 10,
+            message: "username can not be greater than 10 digits"
+          }
+        })}
         className="duration-300 border-b-2 border-solid border-black focus:border-cyan-300 outline-none font-sans font-bold py-3 px-3 w-full max-w-[45ch] text-slate-900"
         placeholder="Please Enter Username"
+        aria-invalid={errors.username ? "true" : "false"}
       />
+          {errors.username && (
+        <p className="w-full max-w-[39ch] text-rose-300 mt-[-2ch]" role="alert">
+          {errors.username?.message}
+        </p>
+      )}
+
       <input
-        type="text"
-        name="email"
-        onChange={changeHandler}
+        {...register("email", {
+          required: " Please enter email !",
+          pattern: {
+            value:
+              /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            message: "Invalid Email!",
+          },
+          maxLength: {
+            value: 50,
+            message: "Email can not be more than 50 characters"
+          }
+        })}
         className="duration-300 border-b-2 border-solid border-black focus:border-cyan-300 outline-none font-sans font-bold py-3 px-3 w-full max-w-[45ch] text-slate-900"
         placeholder="Please Enter a Valid Email Address"
+        // aria-invalid={errors.email ? "true" : "false"}
       />
+          {errors.email && (
+        <p className="w-full max-w-[39ch] text-rose-300 mt-[-2ch]" role="alert">
+         {errors.email?.message}
+        </p>
+      )}
+
       <input
-        name="password"
+        {...register("password", {
+          required: "Please enter password !",
+          minLength: {
+            value: 6,
+            message: "Minimum of 6 digits"
+          }
+      }
+        )}
         autoComplete="off"
-        onChange={changeHandler}
-        type="text"
         className="duration-300 border-b-2 border-solid border-black focus:border-cyan-300 outline-none font-sans font-bold py-3 px-3 w-full max-w-[45ch] text-slate-900"
         placeholder="Please Enter Password"
+        aria-invalid={errors.password ? "true" : "false"}
       />
+          {errors.password && (
+        <p className="w-full max-w-[39ch] text-rose-300 mt-[-2ch]" role="alert">
+          {errors.password?.message}
+        </p>
+      )}
+
       <button
-        value={loading ? "Loading..." : "register"}
-        // disabled={val == false}
-        onClick={submitHandler}
+        // disabled={!formState.isValid}
         className="relative after:absolute after:top-0 after:right-full after:bg-white after:z-10 after:w-full after:h-full overflow-hidden hover:after:translate-x-full after:duration-300 hover:text-slate-900
       duration-300 w-full max-w-[39ch] border border-white border-solid uppercase py-2 px-2 text-white"
       >
         <h2 className="relative z-30"> Sign Up</h2>
       </button>
+
       <div className="flex mt-1 gap-4 text-center justify-center select-none">
         <div className="py-1 px-1 font-sans bg-hover:red font-bold text-1xl text-slate-200 bg-cyan-700">
           <Link href="/login">Already Have an Account ?</Link>
@@ -136,6 +220,6 @@ export default function Register() {
           <Link href="/">Navigate to Home ?</Link>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

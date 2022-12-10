@@ -1,16 +1,13 @@
-import React from 'react'
-import Footer from './Footer'
-import Header from './Header'
+import Sidebar from "../components/Sidebar";
+// import Footer from './Footer'
+// import Header from './Header'
 
-export default function Layout(props) {
-    const { children } = props
+export default function Layout({ children}) {
+
   return (
-    <div className='flex flex-col min-h-screen relative bg-slate-900'>
-         {/* <Header/> */}
-         <hero className=''>
-         {children}
-         </hero>
-         {/* <Footer/> */}
+    <div className='h-screen flex flex-row min-h-screen bg-light-lighter'>
+       <Sidebar/>
+      {children}
     </div>
   )
 }

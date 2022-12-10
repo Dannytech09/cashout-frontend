@@ -1,6 +1,6 @@
 import axios from "axios"
 import React, {useState} from "react";
-import { setUserSession, getUser } from "./Utils/Common";
+import { setUserSession, getUser } from "../Utils/Common";
 import Link from 'next/link';
 
 export default function Login() {

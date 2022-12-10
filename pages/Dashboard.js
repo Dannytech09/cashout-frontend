@@ -1,56 +1,59 @@
-import axios from "axios";
-import React, { useState, useEffect } from "react";
-import { getToken, removeUserSession } from "./Utils/Common";
+import Head from "next/head";
+import SmileIcon from "../components/icons/SmileIcon";
+import Layout from "../components/Layout";
+import Greetings from "../components/utils/Greetings";
+import styles from "../styles/dashboard.module.css";
+import React, { useState, useEffect} from "react"
 
 export default function Dashboard() {
-  const [user, setUser] = useState([]);
+  // const me = sessionStorage.getItem("user");
+  // console.log(me.balance.$numberDecimal);
 
-  const fetchUser = async () => {
-    const response = await axios.get(
-      "https://cashout-app.herokuapp.com/api/v1/auth/me",
-      {
-        headers: {
-          Authorization: `Bearer ${sessionStorage.getItem("token")}`,
-        },
-      }
-    );
+  const [user, setUser] = useState();
 
-    console.log(response)
-    setUser(response?.data.data);
-  };
-  //  setUser(response?.data?.data);
-console.log(user)
   useEffect(() => {
-    // console.log(sessionStorage.getItem("token"));
-    fetchUser();
-  }, [user]);
+      const user = JSON.parse(sessionStorage.getItem("user"));
+      setUser(user);
+    }, []);
 
-  const logoutHandler = () => {
-    removeUserSession();
-    window.location = "/login";
-  };
 
   return (
-    <div className="text-slate-200">
-      <h1 className="">Welcome to Dashboard Page</h1>
-      <br />
-      <br />
-      <button onClick={logoutHandler}>Logout</button>
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-10 justify-center mt-10">
-        {user && (
-          <div
-            key={user._id}
-            className="border shadow-md p-6 flex flex-col justify-center"
-          >
-            <h1 className="font-bold text-2xl text-slate-300">
-              {user.firstName} {user.lastName}
-            </h1>
-            <p>{user.email}</p>
-            <p>{user.username}</p>
-            <p>{user.phoneNumber}</p>
+    <div className="text-slate-200 ">
+      <Head>
+        <title>My Dashboard</title>
+      </Head>
+
+      <Layout>
+        <div className="w-full">
+          <div className={styles.headerCon}>
+            <div className="flex justify-center pt-3 text-center ">
+              <h1 className="text-light text-lg"> <Greetings/> </h1>
+              <span className="">
+                <SmileIcon />
+              </span>
+            </div>
+            <br />
+
+              { user && (
+            <div className="text-center">
+                <h2 className={styles.welBack}>Welcome Back {user.firstName}!</h2>
+              <p className="mt-2 p-4 text-sm">
+                Refer people to CashOutPlug and earn 1,000 naira immediately the
+                person upgrade his/her account to Partner's Account Type
+              </p>
+              <div className="flex w-full justify-center gap-5 mt-5">
+                <div className="border ml-2 text-sm border-solid border-secondary p-2 rounded-2xl bg-secondary">
+                  <button className={styles.fundWallet}>Fund Wallet</button>
+                </div>
+                <div className="border mr-2 text-sm border-solid border-secondary p-2 rounded-2xl bg-secondary">
+                  <button className={styles.myTransact}>My Transactions</button>
+                </div>
+              </div>
+            </div>
+          )}
           </div>
-        )}
-      </div>
+        </div>
+      </Layout>
     </div>
   );
 }

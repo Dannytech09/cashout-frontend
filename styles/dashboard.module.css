@@ -1,0 +1,21 @@
+.logout {
+    color: red
+}
+
+.headerCon {
+    background-color: rgb(73, 168, 168);
+    padding-bottom: 35px;
+}
+
+.fundWallet {
+    color: firebrick;
+}
+
+.welBack {
+    color: azure;
+    font-size: 18px;
+}
+
+.myTransact {
+    color: firebrick;
+}
